@@ -33,29 +33,30 @@
 
 \begin{abstract}
 本文针对无人机编队飞行中“保持电磁静默、仅通过方向夹角完成定位与队形调整”的问题，
-建立基于到达角约束的纯方位无源定位模型，并给出可执行的编队调整方案。
+建立基于极坐标的纯方位无源定位模型，并给出可执行的编队调整方案。
 
-针对\textbf{问题一(1)}，将接收机到两架已知位置发射机的连线夹角转化为坐标间的非线性方程，
-利用两两发射机形成的角度约束构造最小二乘模型，以名义位置为初值求解。数值验证表明，该
-模型能从 FY00、FY01、FY03 的夹角信息准确恢复存在偏差的 FY02，定位误差低于
-$10^{-8}$~m。
+针对\textbf{问题一(1)}，以圆心处 FY00 为极点，将被动接收无人机的位置记为极坐标
+$(r,\theta)$。利用发射机与接收机之间的距离、点积在极坐标下的表达式，把两两发射机形成的
+方向夹角写为关于 $(r,\theta)$ 的非线性方程，构造最小二乘模型，以接收机的名义理想极坐标为
+初值求解。数值验证表明，该模型能从 FY00、FY01、FY03 的夹角信息准确恢复存在偏差的 FY02，
+定位误差低于 $10^{-8}$~m。
 
 针对\textbf{问题一(2)}，在 FY00、FY01 已知的前提下，通过穷举“未知编号发射机”的所有
 可能组合，比较候选组合能否与全部夹角观测一致。结果显示：只增加 1 架编号未知的发射机时，
 7 种候选中有 6 种仍能与观测一致，不能唯一确定；增加 2 架编号未知的发射机时，21 种候选
 中仅真实组合与观测一致。因此\textbf{除 FY00 和 FY01 外，还需要 2 架无人机发射信号}。
 
-针对\textbf{问题一(3)}，提出“\textbf{锚点逐轮标定—接收机定位—归位}”的迭代调整方案：
-每轮选择 FY00 及最多 3 架圆周无人机作为发射机，其余无人机接收夹角并解算位置，再移动到
-理想圆周位置。对表 1 数据求解，只需\textbf{两轮实际调整加一轮校验}即可使 9 架无人机均匀
-分布在半径 $100$~m 的圆周上；单步最大位移为 $12.011$~m，最终最大位置误差低于
-$10^{-6}$~m。
+针对\textbf{问题一(3)}，提出“\textbf{锚点逐轮标定—接收机定位—归位}”的极坐标迭代
+调整方案：每轮选择 FY00 及最多 3 架圆周无人机作为发射机，其余无人机接收夹角并用极坐标
+模型解算位置，再移动到理想圆周位置。对表 1 数据求解，只需\textbf{两轮实际调整加一轮校验}
+即可使 9 架无人机均匀分布在半径 $100$~m 的圆周上；单步最大位移为 $12.011$~m，最终最大
+位置误差低于 $10^{-6}$~m。
 
-针对\textbf{问题二}，将定位模型和迭代调整算法推广到一般队形。以相邻行间距 $50$~m 的
-锥形编队为例，两轮调整即可完成校正，示例中单步最大位移为 $3.601$~m，最终位置误差
-低于 $10^{-6}$~m。模型计算量小、不依赖绝对位置测量，符合纯方位无源定位的工程约束。
+针对\textbf{问题二}，将极坐标定位模型和迭代调整算法推广到一般队形。以相邻行间距
+$50$~m 的锥形编队为例，两轮调整即可完成校正，示例中单步最大位移为 $3.601$~m，最终位置
+误差低于 $10^{-6}$~m。模型计算量小、不依赖绝对位置测量，符合纯方位无源定位的工程约束。
 
-\textbf{关键词}：纯方位定位；无源定位；最小二乘；无人机编队；迭代调整
+\textbf{关键词}：纯方位定位；极坐标；无源定位；最小二乘；无人机编队
 \end{abstract}
 
 \section{问题重述}
@@ -84,7 +85,7 @@ $10^{-6}$~m。
   \item 夹角观测不含系统误差，随机误差足够小，本文在标称仿真中按无噪声处理；
   \item 发射机的编号可被接收机识别，但问题一(2)中部分发射机编号未知；
   \item 单次调整时间忽略不计，接收机可在完成定位后立即移动到指定位置；
-  \item 无人机具有自身的名义队形信息，可用作定位初值。
+  \item 无人机具有自身的名义队形信息，可用作极坐标定位初值。
 \end{enumerate}
 
 \subsection{符号说明}
@@ -93,56 +94,115 @@ $10^{-6}$~m。
 \toprule
 符号 & 含义 \\
 \midrule
-$P=(x,y)$ & 被动接收无人机的位置 \\
-$A_i=(x_i,y_i)$ & 第 $i$ 架发射无人机的位置 \\
+$P=(r,\theta)$ & 被动接收无人机相对 FY00 的极坐标 \\
+$A_i=(r_i,\theta_i)$ & 第 $i$ 架发射无人机的极坐标 \\
 $\alpha_{ij}$ & 接收机 $P$ 与发射机 $A_i,A_j$ 连线的夹角 \\
-$O$ & 圆心处无人机 FY00 的位置 \\
+$d_i$ & 接收机到第 $i$ 架发射机的距离 \\
+$O$ & 圆心处无人机 FY00 的位置，$r_0=0$ \\
 $R$ & 理想圆周半径，$R=100$~m \\
-$\hat P$ & 由夹角信息解算得到的位置估计 \\
+$(\hat r,\hat\theta)$ & 由夹角信息解算得到的极坐标估计 \\
 $S_t$ & 第 $t$ 轮选择的发射机集合 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\section{问题一(1)：已知发射机的纯方位定位模型}
+\section{问题一(1)：基于极坐标的纯方位定位模型}
 
-\subsection{夹角约束与最小二乘模型}
+\subsection{极坐标下的距离与方向夹角}
 
-设接收机 $P=(x,y)$，三架已知位置的发射机分别为 $O=(0,0)$、$A=(x_A,y_A)$、
-$B=(x_B,y_B)$。接收机观测到夹角
+以 FY00 所在位置 $O$ 为极点，以 FY01 所在方向为极轴。接收机位置记为
 \begin{equation}
-\alpha_{ij}=\angle A_i P A_j
-=\arccos\frac{(A_i-P)\cdot(A_j-P)}
-{\|A_i-P\|\,\|A_j-P\|},\quad i<j.
-\label{eq:angle}
+P=(r,\theta),
 \end{equation}
-其中 $(i,j)$ 可取 $(O,A)$、$(O,B)$、$(A,B)$。每两个已知发射机提供一个标量方程，
-因此两个独立夹角即可在二维平面中确定 $P$。
-
-记全部观测夹角为 $\boldsymbol\alpha$，由位置 $P$ 按式(\ref{eq:angle})计算的夹角为
-$\boldsymbol g(P)$。定位问题转化为非线性最小二乘：
+其直角坐标为
 \begin{equation}
-\hat P=\arg\min_{P}\ \big\|\boldsymbol g(P)-\boldsymbol\alpha\big\|_2^2.
-\label{eq:ls}
+x=r\cos\theta,\qquad y=r\sin\theta.
 \end{equation}
-本文采用 Levenberg--Marquardt 法求解式(\ref{eq:ls})，并以接收机的名义理想位置作为
-初值，避免对称解落入错误分支。
+
+设第 $i$ 架发射机 $A_i$ 的极坐标为 $(r_i,\theta_i)$。接收机 $P$ 到 $A_i$ 的距离平方为
+\begin{equation}
+d_i^2
+=\left(r\cos\theta-r_i\cos\theta_i\right)^2
++\left(r\sin\theta-r_i\sin\theta_i\right)^2
+=r^2+r_i^2-2rr_i\cos(\theta_i-\theta).
+\label{eq:dist}
+\end{equation}
+
+发射机 $A_i$、$A_j$ 相对接收机 $P$ 的两个方向向量的点积可写为
+\begin{equation}
+\begin{aligned}
+\overrightarrow{PA_i}\cdot\overrightarrow{PA_j}
+={}&
+r_ir_j\cos(\theta_i-\theta_j)
+-rr_i\cos(\theta_i-\theta)\\
+&{}-rr_j\cos(\theta_j-\theta)+r^2.
+\end{aligned}
+\label{eq:dot}
+\end{equation}
+
+于是接收机与发射机 $A_i,A_j$ 连线的夹角满足
+\begin{equation}
+\cos\alpha_{ij}
+=
+\frac{
+r_ir_j\cos(\theta_i-\theta_j)
+-rr_i\cos(\theta_i-\theta)
+-rr_j\cos(\theta_j-\theta)+r^2
+}
+{d_id_j},
+\label{eq:angle_polar}
+\end{equation}
+即
+\begin{equation}
+\alpha_{ij}
+=
+\arccos\left[
+\frac{\overrightarrow{PA_i}\cdot\overrightarrow{PA_j}}{d_id_j}
+\right].
+\end{equation}
+
+对于圆心处发射机 $O$，取 $r_0=0$，式(\ref{eq:dist})和式(\ref{eq:dot})仍然成立，此时
+$d_0=r$，且有
+\[
+\overrightarrow{PO}\cdot\overrightarrow{PA_i}
+=r^2-rr_i\cos(\theta_i-\theta).
+\]
+
+\subsection{极坐标最小二乘定位模型}
+
+记全部观测夹角为 $\boldsymbol\alpha$，由极坐标 $(r,\theta)$ 按式(\ref{eq:angle_polar})
+计算的夹角为 $\boldsymbol g(r,\theta)$。定位问题转化为关于极坐标的非线性最小二乘：
+\begin{equation}
+(\hat r,\hat\theta)
+=
+\arg\min_{r,\theta}
+\left\|\boldsymbol g(r,\theta)-\boldsymbol\alpha\right\|_2^2.
+\label{eq:ls_polar}
+\end{equation}
+
+本文采用 Levenberg--Marquardt 法求解式(\ref{eq:ls_polar})，并以接收机的名义理想极坐标
+作为初值，以避免几何多解落入错误分支。由于接收机在理想圆周附近，极坐标形式还能直观地
+分离“径向偏差”和“角度偏差”，便于后续队形调整。
 
 \subsection{数值验证}
 
-以 FY02 为待定位接收机，其真实偏差位置为 $(74.962,63.124)$~m。发射机 FY00、FY01、
-FY03 均位于理想位置。观测夹角及定位结果见表~\ref{tab:q11}。
+以 FY02 为待定位接收机，其真实偏差位置为极坐标
+\[
+P=(98,\ 40.10^\circ),
+\]
+换算为直角坐标 $(74.962,63.124)$~m。发射机 FY00、FY01、FY03 均位于理想位置。观测夹角
+及定位结果见表~\ref{tab:q11}。
 
 \begin{table}[H]
 \centering
-\caption{问题一(1)定位结果}
+\caption{问题一(1)极坐标定位结果}
 \label{tab:q11}
 \begin{tabular}{cc}
 \toprule
 项目 & 数值 \\
 \midrule
-真实位置 $P$ & $(74.962,\ 63.124)$~m \\
-解算位置 $\hat P$ & $(74.962,\ 63.124)$~m \\
+真实极坐标 $P$ & $(98.000,\ 40.100^\circ)$ \\
+解算极坐标 $(\hat r,\hat\theta)$ & $(98.000,\ 40.100^\circ)$ \\
 $\angle OPA$ & $71.5354^\circ$ \\
 $\angle OPB$ & $71.6440^\circ$ \\
 $\angle APB$ & $143.1794^\circ$ \\
@@ -161,16 +221,16 @@ $\angle APB$ & $143.1794^\circ$ \\
 
 \section{问题一(2)：未知编号发射机的可辨识性分析}
 
-当仅 FY00 与 FY01 的编号已知时，夹角 $\alpha_{OA}$ 将 $P$ 约束在一条过 $O,A$ 的
-圆弧上，仅靠该信息不能唯一确定 $P$。设另有 $m$ 架编号未知的圆周无人机发射信号，
-接收机获得 $O,A$ 与 $m$ 架未知发射机之间的全部夹角。未知量为 $P$ 以及 $m$ 个发射机
+当仅 FY00 与 FY01 的编号已知时，夹角 $\alpha_{OA}$ 将 $P$ 约束在一条过 $O,A$ 的圆弧上，
+仅靠该信息不能唯一确定 $P$。设另有 $m$ 架编号未知的圆周无人机发射信号，接收机获得
+$O,A$ 与 $m$ 架未知发射机之间的全部夹角。未知量为极坐标 $(r,\theta)$ 以及 $m$ 个发射机
 编号；编号的候选数分别为
 \[
 N_1=C_7^1=7,\quad N_2=C_7^2=21,\quad N_3=C_7^3=35.
 \]
 
-对每一种候选编号组合，用式(\ref{eq:ls})解算 $P$，再检验该组合能否与全部夹角观测
-一致。以接收机 FY02、真实未知发射机 FY03 为例，$m=1$ 时有 6 种候选仍与观测一致；
+对每一种候选编号组合，用式(\ref{eq:ls_polar})解算 $(r,\theta)$，再检验该组合能否与全部
+夹角观测一致。以接收机 FY02、真实未知发射机 FY03 为例，$m=1$ 时有 6 种候选仍与观测一致；
 当 $m=2$、真实未知发射机为 FY03、FY04 时，21 种候选中仅真实组合一致。枚举结果见
 表~\ref{tab:q12}。
 
@@ -192,28 +252,28 @@ N_1=C_7^1=7,\quad N_2=C_7^2=21,\quad N_3=C_7^3=35.
 因此，\textbf{除 FY00 和 FY01 外，至少还需要 2 架无人机发射信号}。两架未知编号发射机
 与两个已知编号发射机共同提供足够的几何约束，同时消除接收机位置和未知编号的组合歧义。
 
-\section{问题一(3)：圆形编队的迭代调整方案}
+\section{问题一(3)：圆形编队的极坐标迭代调整方案}
 
 \subsection{理想队形与目标位置}
 
-取 FY00 位于原点，FY01--FY09 的理想位置为
+取 FY00 位于原点，FY01--FY09 的理想极坐标为
 \begin{equation}
-X_j^{\mathrm{ideal}}=
-\left(100\cos\frac{(j-1)40^\circ}{180^\circ}\pi,\
-100\sin\frac{(j-1)40^\circ}{180^\circ}\pi\right),\quad j=1,\dots,9.
+A_j^{\mathrm{ideal}}
+=
+\left(100,\ (j-1)40^\circ\right),\quad j=1,\dots,9.
 \end{equation}
 
-\subsection{迭代调整算法}
+\subsection{极坐标迭代调整算法}
 
-记第 $t$ 轮位置为 $X_j^{(t)}$，算法如下：
+记第 $t$ 轮位置为 $P_j^{(t)}=(r_j^{(t)},\theta_j^{(t)})$，算法如下：
 
 \textbf{步骤 1}：选择发射机集合 $S_t=\{O\}\cup S_t^*$，其中 $S_t^*$ 为圆周上不超过
 3 架位置已知或已经完成校正的无人机。
 
-\textbf{步骤 2}：对每个接收机 $j\notin S_t$，由发射机位置和观测夹角构造
-式(\ref{eq:ls})，解算 $\hat X_j^{(t)}$。
+\textbf{步骤 2}：对每个接收机 $j\notin S_t$，由发射机极坐标和观测夹角构造
+式(\ref{eq:ls_polar})，解算 $(\hat r_j^{(t)},\hat\theta_j^{(t)})$。
 
-\textbf{步骤 3}：计算位移并执行
+\textbf{步骤 3}：将极坐标估计转换为直角坐标，计算位移并执行
 \[
 \Delta X_j^{(t)}=X_j^{\mathrm{ideal}}-\hat X_j^{(t)},
 \qquad X_j^{(t+1)}=X_j^{(t)}+\Delta X_j^{(t)}.
@@ -229,7 +289,7 @@ $\max_j\|X_j^{(t+1)}-X_j^{\mathrm{ideal}}\|<\varepsilon$，则结束；否则返
 
 \begin{table}[H]
 \centering
-\caption{问题一(3)调整方案与位移}
+\caption{问题一(3)极坐标调整方案与位移}
 \label{tab:q13}
 \begin{tabular}{clcc}
 \toprule
@@ -274,16 +334,17 @@ $\max_j\|X_j^{(t+1)}-X_j^{\mathrm{ideal}}\|<\varepsilon$，则结束；否则返
 
 \section{问题二：一般队形与锥形编队调整}
 
-\subsection{一般队形定位与调整框架}
+\subsection{一般队形极坐标定位与调整框架}
 
 设理想队形模板为 $\mathcal G=\{G_0,G_1,\dots,G_n\}$，其中 $G_0$ 为参考原点。任意队形
-下，式(\ref{eq:angle})与式(\ref{eq:ls})仍然成立，只是发射机位置不再限于圆周点。
-调整算法同样采用“选择锚点、定位接收机、移动到模板位置、逐轮收敛”的策略：
+下，式(\ref{eq:dist})、式(\ref{eq:dot})和式(\ref{eq:ls_polar})仍然成立，只需把发射机
+与接收机统一转换为相对参考点的极坐标。调整算法同样采用“选择锚点、定位接收机、移动到
+模板位置、逐轮收敛”的策略：
 
 \begin{enumerate}
   \item 将已准确定位的无人机加入锚点集合；
   \item 每轮选择参考机及 2--3 架锚点发射信号；
-  \item 对未被选为发射机的无人机，解算其当前位置并移动到模板位置；
+  \item 对未被选为发射机的无人机，用极坐标模型解算其当前位置并移动到模板位置；
   \item 用新校正的无人机扩展锚点集合，继续下一轮，直到满足误差要求。
 \end{enumerate}
 
@@ -328,9 +389,9 @@ $G_3,G_4,G_5$ 为锚点校正 $G_1,G_2$。仿真结果见表~\ref{tab:q2}，示�
 
 \subsection{优点}
 \begin{enumerate}
+  \item 极坐标形式直观分离径向误差和角度误差，便于无人机按“半径—方位”进行调整；
   \item 仅利用方向夹角即可完成定位，不依赖 GPS、测距或绝对位置测量，符合电磁静默要求；
-  \item 最小二乘模型形式统一，适用于圆形、锥形及其他任意二维队形；
-  \item 迭代调整方案可逐步扩大已校正锚点集合，计算量小、易于在线执行。
+  \item 最小二乘模型形式统一，适用于圆形、锥形及其他任意二维队形。
 \end{enumerate}
 
 \subsection{不足与改进}
@@ -350,7 +411,9 @@ Tracking and Navigation}. Wiley, 2001.
 \appendix
 \section{程序说明}
 
-本文完整求解代码见随附文件 \texttt{代码/solve\_problemB.py}，主要功能包括：
+本文完整求解代码见随附文件 \texttt{代码/solve\_problemB.py}。程序内部使用直角坐标实现
+数值求解，但数学模型的建立、推导和调整过程均采用本文给出的极坐标形式；两者通过
+$x=r\cos\theta,\ y=r\sin\theta$ 相互等价。主要功能包括：
 \begin{itemize}
   \item \texttt{pol2cart}、\texttt{cart2pol}：极坐标与直角坐标转换；
   \item \texttt{all\_pair\_angles}：计算接收机与所有发射机对的夹角；
